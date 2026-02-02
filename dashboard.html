@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EASTWEST Shuttle - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="styles/logo.webp" type="image/webp">
+</head>
+
+<body class="dashboard">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">EW Shuttle System</div>
+
+        <ul class="menu">
+            <li class="active">
+                <a href="dashboard.html">
+                    <strong>Dashboard</strong>
+                </a>
+            </li>
+
+            <li id="accountsMenuItem">
+                <a href="Account.html">Accounts</a>
+            </li>
+
+            <li>
+                <div class="dropdown-btn" onclick="toggleDropdown('shuttleMenu')">
+                    Shuttle ▾
+                </div>
+                <ul class="dropdown-menu" id="shuttleMenu">
+                    <li><a href="shuttle.html?id=1">Shuttle 1</a></li>
+                    <li><a href="shuttle.html?id=2">Shuttle 2</a></li>
+                    <li><a href="shuttle.html?id=3">Shuttle 3</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="daily_records.html">Records</a>
+            </li>
+        </ul>
+
+        <!-- Dashboard-only sidebar footer logo -->
+        <div class="dashboard-sidebar-footer">
+            <img src="styles/sidebarlogo.jpg" alt="EastWest BPO Logo">
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="main">
+
+        <!-- Topbar -->
+        <header class="topbar">
+            <div class="user-dropdown">
+                <button class="user-btn" onclick="toggleUserMenu()">
+                    <span id="currentUserDisplay">Loading...</span> ▾
+                </button>
+
+                <ul class="user-menu" id="userMenu">
+                    <li>
+                        <a href="#" onclick="handleLogout(event)">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <main class="content">
+
+            <section class="cards">
+                <div class="card">
+                    <h4>Shuttle 1</h4>
+                    <h2 id="bus1Count">0</h2>
+                </div>
+
+                <div class="card">
+                    <h4>Shuttle 2</h4>
+                    <h2 id="bus2Count">0</h2>
+                </div>
+
+                <div class="card">
+                    <h4>Shuttle 3</h4>
+                    <h2 id="bus3Count">0</h2>
+                </div>
+            </section>
+
+            <section class="cards2">
+                <div class="card">
+                    <h4>Shuttle 1 Status</h4>
+                    <h2 id="shuttle1Status" class="status-offline">Offline</h2>
+                </div>
+
+                <div class="card">
+                    <h4>Shuttle 2 Status</h4>
+                    <h2 id="shuttle2Status" class="status-offline">Offline</h2>
+                </div>
+
+                <div class="card">
+                    <h4>Shuttle 3 Status</h4>
+                    <h2 id="shuttle3Status" class="status-offline">Offline</h2>
+                </div>
+            </section>
+
+            <section class="chart-box">
+                <h4>Today's Records — All Shuttles</h4>
+
+                <table class="lamesa">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Shuttle No.</th>
+                            <th>Employee ID</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="todayPassengerTable">
+                        <tr>
+                            <td colspan="4" style="text-align:center;color:#999;">
+                                No records for today
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+        </main>
+    </div>
+
+<script src="auth.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  PAGE INITIALIZATION (MATCHES Account.html LOGIC)
+// ═══════════════════════════════════════════════════════════════
+
+let currentSession = requireAuth();
+if (!currentSession) {
+    // requireAuth already redirects if not authenticated
+} else {
+    // Display current user
+    document.getElementById('currentUserDisplay').textContent =
+        `${currentSession.username} (${currentSession.role})`;
+
+    // Hide Accounts menu if no permission
+    if (!hasPermission(currentSession.role, 'canViewAccounts')) {
+        document.getElementById('accountsMenuItem').style.display = 'none';
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  UI FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+
+function toggleDropdown(id) {
+    const menu = document.getElementById(id);
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+function toggleUserMenu() {
+    const menu = document.getElementById("userMenu");
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+function handleLogout(e) {
+    e.preventDefault();
+    if (confirm("Logout?")) logout();
+}
+
+// Close user dropdown when clicking outside
+window.addEventListener("click", function(e) {
+    const userBtn = document.querySelector(".user-btn");
+    const userMenu = document.getElementById("userMenu");
+
+    if (userBtn && userMenu &&
+        !userBtn.contains(e.target) &&
+        !userMenu.contains(e.target)) {
+        userMenu.style.display = "none";
+    }
+});
+</script>
+

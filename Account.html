@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EASTWEST Shuttle - Accounts</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="styles/logo.webp" type="image/webp">
+
+    <style>
+        .form-group {
+            position: relative;
+        }
+
+        .form-error {
+            color: #d32f2f;
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+            display: none;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 38px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            color: #666;
+            user-select: none;
+        }
+
+        .role-disabled {
+            background: #f0f0f0;
+            cursor: not-allowed;
+        }
+
+        .no-permission {
+            color: #999;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body class="dashboard">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <div class="logo">EW Shuttle System</div>
+
+    <ul class="menu">
+        <li><a href="dashboard.html"><strong>Dashboard</strong></a></li>
+        <li class="active"><a href="Account.html">Accounts</a></li>
+
+        <li>
+            <div class="dropdown-btn" onclick="toggleDropdown('shuttleMenu')">
+                Shuttle ▾
+            </div>
+            <ul class="dropdown-menu" id="shuttleMenu">
+                <li><a href="shuttle.html?id=1">Shuttle 1</a></li>
+                <li><a href="shuttle.html?id=2">Shuttle 2</a></li>
+                <li><a href="shuttle.html?id=3">Shuttle 3</a></li>
+            </ul>
+        </li>
+
+        <li><a href="daily_records.html">Records</a></li>
+    </ul>
+        <!-- Dashboard-only sidebar footer logo -->
+        <div class="dashboard-sidebar-footer">
+            <img src="styles/sidebarlogo.jpg" alt="EastWest BPO Logo">
+        </div>
+    </aside>
+
+
+
+<!-- MAIN -->
+<div class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <div class="user-dropdown">
+            <button class="user-btn" onclick="toggleUserMenu()">
+                <span id="currentUserDisplay">Loading...</span> ▾
+            </button>
+            <ul class="user-menu" id="userMenu">
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="content">
+
+        <div class="actions-bar">
+            <button class="primary-btn" id="addAccountBtn" onclick="openAddModal()">Add Account</button>
+        </div>
+
+        <section class="chart-box2">
+            <h4>All Accounts</h4>
+
+            <table id="accountsTable">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Created At</th>
+                        <th>Last Login</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="accountsBody"></tbody>
+            </table>
+        </section>
+
+    </main>
+</div>
+
+<!-- ADD ACCOUNT MODAL -->
+<div class="add-account-modal" id="addAccountModal">
+    <div class="auth-card">
+        <h1>Add Account</h1>
+
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="addUsername" autocomplete="off">
+        </div>
+
+        <div class="form-group">
+            <label>Role</label>
+            <select id="addRole">
+                <option value="" disabled selected>Select a role</option>
+                <option value="Dispatcher">Dispatcher</option>
+                <option value="Admin">Admin</option>
+                <option value="Super Admin">Super Admin</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="addPassword" autocomplete="new-password">
+            <span class="toggle-password" onclick="togglePassword('addPassword', this)">👁</span>
+        </div>
+
+        <div class="form-group">
+            <label>Confirm Password</label>
+            <input type="password" id="addConfirmPassword" autocomplete="new-password">
+            <span class="toggle-password" onclick="togglePassword('addConfirmPassword', this)">👁</span>
+            <div class="form-error" id="passwordError"></div>
+        </div>
+
+        <button class="prime-btn" onclick="handleAddAccount()">Add Account</button>
+        <button class="secondary-btn" onclick="closeAddModal()">Cancel</button>
+    </div>
+</div>
+
+<!-- UPDATE ACCOUNT MODAL -->
+<div class="add-account-modal" id="updateAccountModal">
+    <div class="auth-card">
+        <h1>Update Account</h1>
+
+        <input type="hidden" id="updateAccountId">
+
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="updateUsername" autocomplete="off">
+        </div>
+
+        <div class="form-group">
+            <label>Role</label>
+            <select id="updateRole">
+                <option value="Dispatcher">Dispatcher</option>
+                <option value="Admin">Admin</option>
+                <option value="Super Admin">Super Admin</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>New Password (leave blank to keep current)</label>
+            <input type="password" id="updatePassword" autocomplete="new-password">
+            <span class="toggle-password" onclick="togglePassword('updatePassword', this)">👁</span>
+        </div>
+
+        <div class="form-group">
+            <label>Confirm New Password</label>
+            <input type="password" id="updateConfirmPassword" autocomplete="new-password">
+            <span class="toggle-password" onclick="togglePassword('updateConfirmPassword', this)">👁</span>
+            <div class="form-error" id="updatePasswordError"></div>
+        </div>
+
+        <button class="prime-btn" onclick="handleUpdateAccount()">Update Account</button>
+        <button class="secondary-btn" onclick="closeUpdateModal()">Cancel</button>
+    </div>
+</div>
+
+<script src="auth.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  PAGE INITIALIZATION
+// ═══════════════════════════════════════════════════════════════
+
+let currentSession = requireAuth();
+if (!currentSession) {
+    // requireAuth will redirect to login if not authenticated
+} else {
+    // Check if user has permission to view accounts
+    if (!hasPermission(currentSession.role, 'canViewAccounts')) {
+        alert('You do not have permission to view this page');
+        window.location.href = 'dashboard.html';
+    }
+}
+
+// Display current user
+document.getElementById('currentUserDisplay').textContent = 
+    `${currentSession.username} (${currentSession.role})`;
+
+// ═══════════════════════════════════════════════════════════════
+//  UI FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+
+function toggleDropdown(id) {
+    const menu = document.getElementById(id);
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+function toggleUserMenu() {
+    const menu = document.getElementById("userMenu");
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+function togglePassword(inputId, icon) {
+    const input = document.getElementById(inputId);
+    if (input.type === "password") {
+        input.type = "text";
+        icon.textContent = "🙈";
+    } else {
+        input.type = "password";
+        icon.textContent = "👁";
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MODAL MANAGEMENT
+// ═══════════════════════════════════════════════════════════════
+
+function openAddModal() {
+    if (!hasPermission(currentSession.role, 'canCreateAccount')) {
+        alert('You do not have permission to create accounts');
+        return;
+    }
+    document.getElementById("addAccountModal").style.display = "flex";
+    clearAddForm();
+}
+
+function closeAddModal() {
+    document.getElementById("addAccountModal").style.display = "none";
+}
+
+function clearAddForm() {
+    document.getElementById("addUsername").value = "";
+    document.getElementById("addRole").value = "";
+    document.getElementById("addPassword").value = "";
+    document.getElementById("addConfirmPassword").value = "";
+    document.getElementById("passwordError").style.display = "none";
+    document.getElementById("passwordError").textContent = "";
+}
+
+function openUpdateModal(accountId) {
+    if (!hasPermission(currentSession.role, 'canUpdateAccount')) {
+        alert('You do not have permission to update accounts');
+        return;
+    }
+
+    const accounts = getAllAccounts();
+    const account = accounts.find(acc => acc.id === accountId);
+    
+    if (!account) return;
+
+    document.getElementById("updateAccountId").value = account.id;
+    document.getElementById("updateUsername").value = account.username;
+    document.getElementById("updateRole").value = account.role;
+    document.getElementById("updatePassword").value = "";
+    document.getElementById("updateConfirmPassword").value = "";
+    document.getElementById("updatePasswordError").style.display = "none";
+
+    // Disable role dropdown if user cannot change roles
+    const roleSelect = document.getElementById("updateRole");
+    if (!hasPermission(currentSession.role, 'canChangeRole')) {
+        roleSelect.disabled = true;
+        roleSelect.classList.add('role-disabled');
+    } else {
+        roleSelect.disabled = false;
+        roleSelect.classList.remove('role-disabled');
+    }
+
+    document.getElementById("updateAccountModal").style.display = "flex";
+}
+
+function closeUpdateModal() {
+    document.getElementById("updateAccountModal").style.display = "none";
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ACCOUNT OPERATIONS
+// ═══════════════════════════════════════════════════════════════
+
+function handleAddAccount() {
+    const username = document.getElementById("addUsername").value.trim();
+    const role = document.getElementById("addRole").value;
+    const pass = document.getElementById("addPassword").value;
+    const confirm = document.getElementById("addConfirmPassword").value;
+    const errorEl = document.getElementById("passwordError");
+
+    // Validation
+    if (!username || !role || !pass || !confirm) {
+        errorEl.textContent = "All fields are required";
+        errorEl.style.display = "block";
+        return;
+    }
+
+    if (pass !== confirm) {
+        errorEl.textContent = "Passwords do not match";
+        errorEl.style.display = "block";
+        return;
+    }
+
+    if (pass.length < 6) {
+        errorEl.textContent = "Password must be at least 6 characters";
+        errorEl.style.display = "block";
+        return;
+    }
+
+    // Create account
+    const result = createAccount(username, role, pass, currentSession.userId);
+
+    if (result.success) {
+        alert('Account created successfully!');
+        closeAddModal();
+        loadAccounts();
+    } else {
+        errorEl.textContent = result.message;
+        errorEl.style.display = "block";
+    }
+}
+
+function handleUpdateAccount() {
+    const accountId = document.getElementById("updateAccountId").value;
+    const username = document.getElementById("updateUsername").value.trim();
+    const role = document.getElementById("updateRole").value;
+    const pass = document.getElementById("updatePassword").value;
+    const confirm = document.getElementById("updateConfirmPassword").value;
+    const errorEl = document.getElementById("updatePasswordError");
+
+    // Validation
+    if (!username || !role) {
+        errorEl.textContent = "Username and role are required";
+        errorEl.style.display = "block";
+        return;
+    }
+
+    // If password is being changed
+    if (pass || confirm) {
+        if (pass !== confirm) {
+            errorEl.textContent = "Passwords do not match";
+            errorEl.style.display = "block";
+            return;
+        }
+
+        if (pass.length < 6) {
+            errorEl.textContent = "Password must be at least 6 characters";
+            errorEl.style.display = "block";
+            return;
+        }
+    }
+
+    // Prepare updates
+    const updates = { username, role };
+    if (pass) {
+        updates.password = pass;
+    }
+
+    // Update account
+    const result = updateAccount(accountId, updates);
+
+    if (result.success) {
+        alert('Account updated successfully!');
+        closeUpdateModal();
+        loadAccounts();
+    } else {
+        errorEl.textContent = result.message;
+        errorEl.style.display = "block";
+    }
+}
+
+function handleDeleteAccount(accountId, username) {
+    if (!hasPermission(currentSession.role, 'canDeleteAccount')) {
+        alert('You do not have permission to delete accounts');
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to delete account "${username}"?`)) {
+        return;
+    }
+
+    deleteAccount(accountId);
+    alert('Account deleted successfully');
+    loadAccounts();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  RENDER ACCOUNTS TABLE
+// ═══════════════════════════════════════════════════════════════
+
+function loadAccounts() {
+    const tbody = document.getElementById("accountsBody");
+    tbody.innerHTML = "";
+
+    const accounts = getAllAccounts();
+    const canDelete = hasPermission(currentSession.role, 'canDeleteAccount');
+    const canUpdate = hasPermission(currentSession.role, 'canUpdateAccount');
+
+    accounts.forEach(account => {
+        const row = document.createElement("tr");
+
+        // Format dates
+        const createdAt = new Date(account.createdAt).toLocaleString();
+        const lastLogin = account.lastLogin 
+            ? new Date(account.lastLogin).toLocaleString() 
+            : 'Never';
+
+        // Build action buttons
+        let actions = '';
+        
+        if (canUpdate) {
+            actions += `<button class="update" onclick="openUpdateModal('${account.id}')">Update</button>`;
+        }
+        
+        if (canDelete) {
+            actions += `<button class="delete" onclick="handleDeleteAccount('${account.id}', '${account.username}')">Delete</button>`;
+        }
+
+        if (!canUpdate && !canDelete) {
+            actions = '<span class="no-permission">No permissions</span>';
+        }
+
+        row.innerHTML = `
+            <td>${account.username}</td>
+            <td>${account.role}</td>
+            <td>${createdAt}</td>
+            <td>${lastLogin}</td>
+            <td>${actions}</td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+
+    // Show/hide add button based on permissions
+    const addBtn = document.getElementById("addAccountBtn");
+    if (hasPermission(currentSession.role, 'canCreateAccount')) {
+        addBtn.style.display = "inline-block";
+    } else {
+        addBtn.style.display = "none";
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  INITIALIZE PAGE
+// ═══════════════════════════════════════════════════════════════
+
+loadAccounts();
+
+// Close dropdowns when clicking outside
+window.addEventListener("click", function(e) {
+    const userBtn = document.querySelector(".user-btn");
+    const userMenu = document.getElementById("userMenu");
+    
+    if (!userBtn.contains(e.target) && !userMenu.contains(e.target)) {
+        userMenu.style.display = "none";
+    }
+});
+</script>
+
+</body>
+</html>

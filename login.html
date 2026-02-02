@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>EASTWEST Shuttle - Login</title>
+	<link rel="stylesheet" href="style.css">
+	<link rel="icon" href="styles/logo.webp" type="image/webp">
+	
+	<style>
+		body {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			min-height: 100vh;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			margin: 0;
+			font-family: Arial, sans-serif;
+		}
+
+		.login-container {
+			background: white;
+			padding: 40px;
+			border-radius: 16px;
+			box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+			width: 400px;
+			max-width: 90%;
+		}
+
+		.logo-section {
+			text-align: center;
+			margin-bottom: 30px;
+		}
+
+		.logo-placeholder {
+			width: 100px;
+			height: 100px;
+			margin-bottom: 15px;
+		}
+
+		.company-name {
+			font-size: 20px;
+			font-weight: bold;
+			color: #333;
+			margin-bottom: 10px;
+		}
+
+		h2 {
+			text-align: center;
+			color: #333;
+			margin-bottom: 25px;
+		}
+
+		.form-group {
+			margin-bottom: 20px;
+		}
+
+		label {
+			display: block;
+			margin-bottom: 8px;
+			font-weight: 600;
+			color: #555;
+		}
+
+		input {
+			width: 100%;
+			padding: 12px;
+			border: 1px solid #ddd;
+			border-radius: 8px;
+			font-size: 14px;
+			box-sizing: border-box;
+			transition: border-color 0.3s;
+		}
+
+		input:focus {
+			outline: none;
+			border-color: #667eea;
+		}
+
+		.login-btn {
+			width: 100%;
+			padding: 14px;
+			background: #0000b8;
+			color: white;
+			border: none;
+			border-radius: 8px;
+			font-size: 16px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: background 0.3s;
+		}
+
+		.login-btn:hover {
+			background: #1d4ed8;
+		}
+
+		.error-message {
+			background: #fee;
+			color: #c33;
+			padding: 12px;
+			border-radius: 8px;
+			margin-bottom: 20px;
+			display: none;
+			text-align: center;
+		}
+
+		.default-creds {
+			margin-top: 20px;
+			padding: 15px;
+			background: #f0f9ff;
+			border-left: 4px solid #0ea5e9;
+			border-radius: 4px;
+			font-size: 13px;
+		}
+
+		.default-creds strong {
+			color: #0369a1;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="login-container">
+
+		<div class="logo-section">
+			<img src="styles/logo.webp" alt="Logo" class="logo-placeholder" />
+			<div class="company-name">EASTWEST SHUTTLE SYSTEM</div>
+		</div>
+
+		<h2>Login</h2>
+
+		<div class="error-message" id="errorMessage"></div>
+
+		<form id="loginForm" onsubmit="handleLogin(event)">
+			<div class="form-group">
+				<label for="username">Username</label>
+				<input type="text" id="username" name="username" required autocomplete="username">
+			</div>
+
+			<div class="form-group">
+				<label for="password">Password</label>
+				<input type="password" id="password" name="password" required autocomplete="current-password">
+			</div>
+
+			<button type="submit" class="login-btn">LOGIN</button>
+		</form>
+
+		<div class="default-creds">
+			<strong>Default Login:</strong><br>
+			Username: <code>admin</code><br>
+			Password: <code>admin123</code>
+		</div>
+
+	</div>
+
+	<script src="auth.js"></script>
+	<script>
+		// Check if already logged in
+		const session = getCurrentSession();
+		if (session) {
+			window.location.href = 'dashboard.html';
+		}
+
+		function handleLogin(event) {
+			event.preventDefault();
+			
+			const username = document.getElementById('username').value.trim();
+			const password = document.getElementById('password').value;
+			const errorMsg = document.getElementById('errorMessage');
+			
+			// Clear previous error
+			errorMsg.style.display = 'none';
+			
+			// Attempt login
+			const result = login(username, password);
+			
+			if (result.success) {
+				// Redirect to dashboard
+				window.location.href = 'dashboard.html';
+			} else {
+				// Show error
+				errorMsg.textContent = result.message;
+				errorMsg.style.display = 'block';
+			}
+		}
+	</script>
+
+</body>
+</html>
