@@ -5,6 +5,7 @@ ShuttleOS provides real-time visibility into fleet logistics. Depending on your 
 
 
 2. **Detailed Instructions by Role**
+
 **Super Admin** The System Architect
 As a Super Admin, you are responsible for the system's integrity and user management.
 
