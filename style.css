@@ -125,7 +125,7 @@ body {
     justify-content: flex-end;
     align-items: center;
     padding: 12px 20px;
-    background: #0000b8;
+    background: #fff;
     border-bottom: 1px solid #e0e0e0;
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     position: sticky;
@@ -137,7 +137,6 @@ body {
    USER DROPDOWN BUTTON
 ========================= */
 .user-dropdown {
-    background: #0000b8;
     position: relative;
 }
 
@@ -148,7 +147,7 @@ body {
     gap: 6px;
 
     background: #0000b8; /* brand */
-    color: #0000b8;
+    color: #fff;
 
     border: none;
     border-radius: 8px;
@@ -180,7 +179,7 @@ body {
     right: 0;
     top: calc(100% + 8px);
 
-    width: 170px;
+    width: 180px;
     padding: 8px;
 
     background: #ffffff;
