@@ -3,18 +3,8 @@
 1. **System Overview**
 ShuttleOS provides real-time visibility into fleet logistics. Depending on your assigned role, you will have specific permissions to manage users, monitor shuttle movements, or analyze passenger data.
 
-2. **Roles and Permissions**
-Access is strictly governed by three distinct tiers. Use the table below to identify your capabilities:
-Feature           	   Super Admin| Admin | Dispatcher
-Create New Accounts   	   ✅	    |  ❌	|  ❌
-Delete/Remove Accounts     ✅    |  ❌	  |  ❌
-Change User Roles	         ✅	    |  ❌	|  ❌
-Update Account Info	       ✅	    |  ✅	|  ❌
-View User Lists	           ✅	    |  ✅	|  ❌
-View Dashboard & Records   ✅	    |  ✅	|  ✅
 
-
-3. **Detailed Instructions by Role**
+2. **Detailed Instructions by Role**
 **Super Admin** The System Architect
 As a Super Admin, you are responsible for the system's integrity and user management.
 
@@ -42,7 +32,7 @@ Historical Records: You can search through past logs to verify passenger totals 
 
 Constraint: You cannot edit any user profiles or system settings. Your access is strictly for operational oversight.
 
-4. **Key Features & Navigation**
+3. **Key Features & Navigation**
 The Monitoring Dashboard
 The heart of the system. Here you can see the Daily Passenger Count and the Shuttle Status (Active, In Maintenance, or Idle).
 
